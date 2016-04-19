@@ -1,77 +1,137 @@
-;; -*- mode: emacs-lisp -*-
-;; Simple .emacs configuration
+;;; init.el --- Prelude's configuration entry point.
+;;
+;; Copyright (c) 2011-2016 Bozhidar Batsov
+;;
+;; Author: Bozhidar Batsov <bozhidar@batsov.com>
+;; URL: http://batsov.com/prelude
+;; Version: 1.0.0
+;; Keywords: convenience
 
-;; ---------------------
-;; -- Global Settings --
-;; ---------------------
-(add-to-list 'load-path "~/.emacs.d")
-(require 'cl)
-(require 'ido)
-(require 'ffap)
-(require 'uniquify)
-(require 'ansi-color)
-(require 'recentf)
-(require 'linum)
-(require 'smooth-scrolling)
-(require 'whitespace)
-(require 'dired-x)
-(require 'compile)
-(ido-mode t)
-(menu-bar-mode -1)
-(normal-erase-is-backspace-mode 1)
-(put 'downcase-region 'disabled nil)
-(put 'upcase-region 'disabled nil)
-(setq column-number-mode t)
-(setq inhibit-startup-message t)
-(setq save-abbrevs nil)
-(setq show-trailing-whitespace t)
-(setq suggest-key-bindings t)
-(setq vc-follow-symlinks t)
+;; This file is not part of GNU Emacs.
 
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:inherit autoface-default :strike-through nil :underline nil :slant normal :weight normal :height 120 :width normal :family "monaco"))))
- '(column-marker-1 ((t (:background "red"))))
- '(diff-added ((t (:foreground "cyan"))))
- '(flymake-errline ((((class color) (background light)) (:background "Red"))))
- '(font-lock-comment-face ((((class color) (min-colors 8) (background light)) (:foreground "red"))))
- '(fundamental-mode-default ((t (:inherit default))))
- '(highlight ((((class color) (min-colors 8)) (:background "white" :foreground "magenta"))))
- '(isearch ((((class color) (min-colors 8)) (:background "yellow" :foreground "black"))))
- '(linum ((t (:foreground "black" :weight bold))))
- '(region ((((class color) (min-colors 8)) (:background "white" :foreground "magenta"))))
- '(secondary-selection ((((class color) (min-colors 8)) (:background "gray" :foreground "cyan"))))
- '(show-paren-match ((((class color) (background light)) (:background "black"))))
- '(vertical-border ((t nil)))
-)
+;;; Commentary:
 
-;; ------------
-;; -- Macros --
-;; ------------
-(load "defuns-config.el")
-(fset 'align-equals "\C-[xalign-regex\C-m=\C-m")
-(global-set-key "\M-=" 'align-equals)
-(global-set-key "\C-x\C-m" 'execute-extended-command)
-(global-set-key "\C-c;" 'comment-or-uncomment-region)
-(global-set-key "\M-n" 'next5)
-(global-set-key "\M-p" 'prev5)
-(global-set-key "\M-o" 'other-window)
-(global-set-key "\M-i" 'back-window)
-(global-set-key "\C-z" 'zap-to-char)
-(global-set-key "\C-h" 'backward-delete-char)
-(global-set-key "\M-d" 'delete-word)
-(global-set-key "\M-h" 'backward-delete-word)
-(global-set-key "\M-u" 'zap-to-char)
+;; This file simply sets up the default load path and requires
+;; the various modules defined within Emacs Prelude.
 
-;; ---------------------------
-;; -- JS Mode configuration --
-;; ---------------------------
-(load "js-config.el")
-(add-to-list 'load-path "~/.emacs.d/jade-mode") ;; github.com/brianc/jade-mode
-(require 'sws-mode)
-(require 'jade-mode)    
-(add-to-list 'auto-mode-alist '("\\.styl$" . sws-mode))
-(add-to-list 'auto-mode-alist '("\\.jade$" . jade-mode))
+;;; License:
+
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License
+;; as published by the Free Software Foundation; either version 3
+;; of the License, or (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs; see the file COPYING.  If not, write to the
+;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+;; Boston, MA 02110-1301, USA.
+
+;;; Code:
+(defvar current-user
+      (getenv
+       (if (equal system-type 'windows-nt) "USERNAME" "USER")))
+
+(message "Prelude is powering up... Be patient, Master %s!" current-user)
+
+(when (version< emacs-version "24.1")
+  (error "Prelude requires at least GNU Emacs 24.1, but you're running %s" emacs-version))
+
+;; Always load newest byte code
+(setq load-prefer-newer t)
+
+(defvar prelude-dir (file-name-directory load-file-name)
+  "The root dir of the Emacs Prelude distribution.")
+(defvar prelude-core-dir (expand-file-name "core" prelude-dir)
+  "The home of Prelude's core functionality.")
+(defvar prelude-modules-dir (expand-file-name  "modules" prelude-dir)
+  "This directory houses all of the built-in Prelude modules.")
+(defvar prelude-personal-dir (expand-file-name "personal" prelude-dir)
+  "This directory is for your personal configuration.
+
+Users of Emacs Prelude are encouraged to keep their personal configuration
+changes in this directory.  All Emacs Lisp files there are loaded automatically
+by Prelude.")
+(defvar prelude-personal-preload-dir (expand-file-name "preload" prelude-personal-dir)
+  "This directory is for your personal configuration, that you want loaded before Prelude.")
+(defvar prelude-vendor-dir (expand-file-name "vendor" prelude-dir)
+  "This directory houses packages that are not yet available in ELPA (or MELPA).")
+(defvar prelude-savefile-dir (expand-file-name "savefile" prelude-dir)
+  "This folder stores all the automatically generated save/history-files.")
+(defvar prelude-modules-file (expand-file-name "prelude-modules.el" prelude-dir)
+  "This files contains a list of modules that will be loaded by Prelude.")
+
+(unless (file-exists-p prelude-savefile-dir)
+  (make-directory prelude-savefile-dir))
+
+(defun prelude-add-subfolders-to-load-path (parent-dir)
+ "Add all level PARENT-DIR subdirs to the `load-path'."
+ (dolist (f (directory-files parent-dir))
+   (let ((name (expand-file-name f parent-dir)))
+     (when (and (file-directory-p name)
+                (not (string-prefix-p "." f)))
+       (add-to-list 'load-path name)
+       (prelude-add-subfolders-to-load-path name)))))
+
+;; add Prelude's directories to Emacs's `load-path'
+(add-to-list 'load-path prelude-core-dir)
+(add-to-list 'load-path prelude-modules-dir)
+(add-to-list 'load-path prelude-vendor-dir)
+(prelude-add-subfolders-to-load-path prelude-vendor-dir)
+
+;; reduce the frequency of garbage collection by making it happen on
+;; each 50MB of allocated data (the default is on every 0.76MB)
+(setq gc-cons-threshold 50000000)
+
+;; warn when opening files bigger than 100MB
+(setq large-file-warning-threshold 100000000)
+
+;; preload the personal settings from `prelude-personal-preload-dir'
+(when (file-exists-p prelude-personal-preload-dir)
+  (message "Loading personal configuration files in %s..." prelude-personal-preload-dir)
+  (mapc 'load (directory-files prelude-personal-preload-dir 't "^[^#].*el$")))
+
+(message "Loading Prelude's core...")
+
+;; the core stuff
+(require 'prelude-packages)
+(require 'prelude-custom)  ;; Needs to be loaded before core, editor and ui
+(require 'prelude-ui)
+(require 'prelude-core)
+(require 'prelude-mode)
+(require 'prelude-editor)
+(require 'prelude-global-keybindings)
+
+;; OSX specific settings
+(when (eq system-type 'darwin)
+  (require 'prelude-osx))
+
+(message "Loading Prelude's modules...")
+
+;; the modules
+(if (file-exists-p prelude-modules-file)
+    (load prelude-modules-file)
+  (message "Missing modules file %s" prelude-modules-file)
+  (message "You can get started by copying the bundled example file"))
+
+;; config changes made through the customize UI will be store here
+(setq custom-file (expand-file-name "custom.el" prelude-personal-dir))
+
+;; load the personal settings (this includes `custom-file')
+(when (file-exists-p prelude-personal-dir)
+  (message "Loading personal configuration files in %s..." prelude-personal-dir)
+  (mapc 'load (directory-files prelude-personal-dir 't "^[^#].*el$")))
+
+(message "Prelude is ready to do thy bidding, Master %s!" current-user)
+
+(prelude-eval-after-init
+ ;; greet the use with some useful tip
+ (run-at-time 5 nil 'prelude-tip-of-the-day))
+
+
+
+;;; init.el ends here
