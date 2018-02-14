@@ -45,12 +45,18 @@
  ;; If there is more than one, they won't work right.
  )
 
-(set-face-attribute 'default nil :height 180)
-(setq mac-pass-command-to-system nil)
+(set-face-attribute 'default nil :height 160)
+
+(eval-after-load "prelude-mode"
+  '(define-key prelude-mode-map (kbd "M-o") nil))
+(global-set-key (kbd "C-'") 'help-command)
+
+(setq mac-command-modifier 'meta)
+(setq mac-option-modifier 'super)
+
 (global-set-key "\C-h" 'backward-delete-char)
 (global-set-key "\M-o" 'other-window)
 (global-set-key "\M-d" 'kill-word)
 (global-set-key "\M-h" 'backward-kill-word)
 (global-set-key "\M-i" 'switch-to-buffer)
-(global-set-key (kbd "C-'") 'help-command)
 (global-set-key "\C-c r" 'slime-eval-buffer)
