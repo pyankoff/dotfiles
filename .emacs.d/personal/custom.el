@@ -51,9 +51,6 @@
   '(define-key prelude-mode-map (kbd "M-o") nil))
 (global-set-key (kbd "C-'") 'help-command)
 
-(setq mac-command-modifier 'meta)
-(setq mac-option-modifier 'super)
-
 (global-set-key "\C-h" 'backward-delete-char)
 (global-set-key "\M-o" 'other-window)
 (global-set-key "\M-d" 'kill-word)
