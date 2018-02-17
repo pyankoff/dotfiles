@@ -65,13 +65,13 @@
 (add-to-list 'web-mode-indentation-params '("lineup-concats" . nil))
 (add-to-list 'web-mode-indentation-params '("lineup-ternary" . nil))
 (add-to-list 'web-mode-indentation-params '("case-extra-offset" . 2))
-(add-hook 'web-mode-hook 'my-web-mode-hook)
 (add-hook 'web-mode-hook
           (lambda ()
             ;; short circuit js mode and just do everything in jsx-mode
             (if (equal web-mode-content-type "javascript")
                 (web-mode-set-content-type "jsx")
               (message "now set to: %s" web-mode-content-type))))
+(add-hook 'web-mode-hook 'subword-mode)
 (setq
  web-mode-engines-alist '(("jsx" . "\\.js\\'")))
 
