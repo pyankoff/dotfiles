@@ -60,6 +60,7 @@
         )
   (setq web-mode-enable-auto-closing t)
   (setq web-mode-enable-auto-pairing t)
+  (setq web-mode-enable-auto-quoting nil)
   )
 (add-hook 'web-mode-hook  'my-web-mode-hook)
 (add-to-list 'web-mode-indentation-params '("lineup-calls" . nil))
